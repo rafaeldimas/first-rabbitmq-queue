@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  pub:
+    build:
+      context: ./pub
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    volumes:
+      - ./pub:/usr/src/app
+    networks:
+      - app-network
+    environment:
+      - MESSAGE_QUEUE=amqp://guest:guest@queue:5672
+    depends_on:
+      - queue
+
+  sub:
+    build:
+      context: ./sub
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    volumes:
+      - ./sub:/usr/src/app
+    networks:
+      - app-network
+    environment:
+      - MESSAGE_QUEUE=amqp://guest:guest@queue:5672
+    depends_on:
+      - queue
+
+  queue:
+    image: rabbitmq:3-alpine
+    hostname: queue
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
